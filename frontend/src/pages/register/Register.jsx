@@ -1,19 +1,38 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom';
-
+import { useMutation } from "@tanstack/react-query"
+import authApi from '../../api/data-set/authApi';
 
 const Register = () => {
-    const {register, handleSubmit,watch, formState: {errors}}  = useForm();
+    const {register, handleSubmit,watch, reset , formState: {errors}}  = useForm();
 
-    const onSubmit =(d) => {
-        console.log(d)
+    const mutation = useMutation({
+        mutationFn : (data) => authApi.registerUser(data),
+        onSuccess : () => {
+            reset()
+        } ,
+        onError : (error) =>{
+            console.log(error?.response?.data?.message);
+        }
+
+    })
+
+    const onSubmit = async(d) => {
+        try {
+            mutation.mutate(d)
+        } catch (error) {
+           console.log(error) 
+        }
     }
   return (
     <div className="max-w-2xl mx-auto flex flex-col md:gap-5 px-6 py-6 my-5 md:my-10 md:shadow-lg">
         <h1 className='lg:text-3xl md:text-2xl text-lg font-bold text-blue-950'>Create an Account</h1>
+        {
+            mutation.isError && <p className='text-red-500 text-sm'>{mutation?.error?.response?.data?.message}</p>
+        }
         <form 
-            className='flex flex-col gap-2 md:gap-5  '
+            className='flex flex-col gap-2 md:gap-5'
             onSubmit={handleSubmit(onSubmit)}
         >
             <div className='flex flex-col md:flex-row gap-2 md:gap-3 '>
@@ -56,7 +75,7 @@ const Register = () => {
                 { errors && <p className='text-xs text-red-600'>{errors.password?.message}</p> }
             </label>
             <div className='flex justify-end mt-2 md:mt-3'>
-                <button type='submit' className="px-2 md:px-5 py-1 md:py-2 rounded-sm bg-blue-600 hover:bg-blue-500 transition duration-300 text-white uppercase text-[10px] md:text-sm">Create User</button>
+                <button type='submit' disabled={mutation.isPending} className="px-2 md:px-5 py-1 md:py-2 rounded-sm bg-blue-600 hover:bg-blue-500 transition duration-300 text-white uppercase text-[10px] md:text-sm">{ mutation.isPending ? "Loading..." : "Create User"}</button>
             </div>
             <div className='mt-5 text-center'>
                 <span className='text-gray-500 text-[12px] md:text-sm'>Already hava an account?</span> {" "}

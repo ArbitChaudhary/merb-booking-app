@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.showText {
+
+}
+.hideText{
+    display: none;
+    transition: all ease 300ms;
+}
+.showText:hover > .hideText {
+    display: block;
+} 
